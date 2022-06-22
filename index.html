@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AGUASAN</title>
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+    crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div id="app">
+        <h1 style="text-align: center; color: blue">AGUASAN Billing Interface</h1>
+        <hr>
+        <div class="container my-2">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Name: </span>
+                <input v-model="values[4].iname" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Stratum: </span>
+                <select  v-model.number="values[4].istratum" class="form-select form-select-lg" aria-label=".form-select-lg example">
+                    <option  selected value="0">Choose the stratum</option>
+                    <option  value="1" >Stratum 1</option>
+                    <option value="2" >Stratum 2</option>
+                    <option value="3" >Stratum 3</option>
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Consumption(m³): </span>
+                <input v-model.number="values[4].iconsume" type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="btn-group justify-content-center" role="group" aria-label="Basic outlined example">
+                <button type="button" class="btn btn btn-success mb-3" @click="add">Add</button>
+                <button type="button" class="btn btn-outline-primary mb-3" @click="report">Report</button>
+            </div>
+            <div class="container">
+                <table class="table table-dark table-striped table-hover border">
+                    <thead>
+                        <tr class="text-center">
+                            <th>Name</th>
+                            <th>Stratum</th>
+                            <th>Consumption(m³)</th>
+                            <th>Subsidy</th>
+                            <th>Subtotal</th>
+                            <th>Total</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody v-if="list.length">
+                        <tr v-for="(item, index) in list" :key="item.id" class="text-center">
+                            <td v-text="item.name"></td>
+                            <td v-text="item.stratum"></td>
+                            <td v-text="item.consumption"></td>
+                            <td v-text="item.subsidy"></td>
+                            <td v-text="item.subtotal"></td>
+                            <td v-text="item.total"></td>
+                            <td>
+                                <button @click="bill(item)" type="button" class="btn btn-success">Bill <i class="fas fa-file-invoice-dollar"></i></button>
+                                <button @click="deleteItem(index)" type="button" class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
+                                <button type="button" class="btn btn-warning"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody v-else=>
+                        <tr>
+                            <td colspan="7" class="text-center">Users not found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card" v-if="status === true">
+                <h5 class="card-header">Bill <span style="float: right;"><button @click="close" type="button" class="btn btn-dark"><strong>X</strong></button></span></h5>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Name: <span v-text="dinamic_objs.uname"></span></h5>
+                    <p class="card-text">Stratum: <span v-text="dinamic_objs.ustratum"></span></p>
+                    <p class="card-text">Consumption(m³): <span v-text="dinamic_objs.uconsume"></span></p>
+                    <p class="card-text">Fixed Charge: <span v-text="dinamic_objs.uFc"></span></p>
+                    <p class="card-text">Price by m³: <span v-text="dinamic_objs.um3p"></span></p>
+                    <p class="card-text">Subsidy: <span v-text="dinamic_objs.uSubsidy"></span></p>
+                    <p class="card-text">Subtotal: <span v-text="dinamic_objs.uSubtotal"></span ></p>
+                    <p class="card-text">Total: <span v-text="dinamic_objs.uTotal"></span></p>
+                </div>
+            </div>
+            <div class="card" v-else-if="status === false">
+                <h5 class="card-header text-center">Report <span style="float: right;"><button @click="close" type="button" class="btn btn-dark"><strong>X</strong></button></span></h5>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Average m³ consumed stratum 1:  <span v-text="values[3].average1"></span></h5>
+                    <h5 class="card-title">Average m³ consumed stratum 2:  <span v-text="values[3].average2"></span></h5>
+                    <h5 class="card-title">Average m³ consumed stratum 3:  <span v-text="values[3].average3"></span></h5>
+                    <h5 class="card-title">Total per stratum 1:   <span v-text="values[3].itstratum1"></span></h5>
+                    <h5 class="card-title">Total per stratum 2:   <span v-text="values[3].itstratum2"></span></h5>
+                    <h5 class="card-title">Total per stratum 3:   <span v-text="values[3].itstratum3"></span></h5>
+                    <h5 class="card-title">Final Total:   <span v-text="values[3].ifinaltotal"></span></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.0-alpha.4/vue.js"></script>
+<script src="js/main.js"></script>
+
+</html>
